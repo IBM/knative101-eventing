@@ -1,4 +1,4 @@
-# Create Broker and Trigger
+# Use `Broker` and `Trigger` to manage events and subscriptions
 
 We use `GithubSource` as the example. We will create a broker and a subscription.
 

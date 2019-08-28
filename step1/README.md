@@ -1,4 +1,4 @@
-# Enable Knative add-on
+# Enable Knative add-on on IBM Cloud Kubernetes Service
 
 Managed Knative add-on on IBM Cloud Kubernetes Service is an easy way to enhance your Kubernetes cluster with Serverless capabilities. It will install IBM tested version of Knative and Istio directly on your IBM Cloud Kubernetes cluster.
 

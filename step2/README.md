@@ -1,4 +1,4 @@
-# Create an Event and subscribe it
+# Link a service to an Event importer
 
 We use `GithubSource` as the example. We will create a Addressable object to receive the event message and print it in logs.
 
