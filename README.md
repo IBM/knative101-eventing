@@ -27,7 +27,9 @@ It should take you about 1 hour to complete this tutorial.
 4. Add `Filter` to `Trigger`
 
 ## Summary
-This tutorial showed you how to process blockchain events using serverless functions on IBM Cloud.
+
 
 ## Related links
-Include links to other resources that may be of interest to someone who is reading your tutorial.
+
+- 想学习Kubernetes可以访问[Kube101](https://github.com/IBM/kube101/tree/master/workshop)。
+- 想学习Istio可以访问[Istio101](https://github.com/IBM/istio101/tree/master/workshop).
