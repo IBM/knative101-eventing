@@ -10,8 +10,9 @@ Before you begin, you’ll need the following:
 
 - [An IBM Cloud account](https://cloud.ibm.com/registration)
 - A [IBM Kubernetes Service cluster](https://cloud.ibm.com/kubernetes/overview) is provisioned, at least with 2 worker nodes.
-- [IBM Cloud CLI](https://cloud.ibm.com/docs/cli/reference/bluemix_cli?topic=cloud-cli-install-ibmcloud-cli) installed
-- [Kubernetes CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed
+- [Setting up Knative in your cluster](https://cloud.ibm.com/docs/containers?topic=containers-serverless-apps-knative#knative-setup)
+- [Kubernetes CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/) is installed
+- [Config Kubernetes CLI to manage IBM Kubernetes Service cluster on IBM Cloud](https://cloud.ibm.com/docs/containers?topic=containers-cs_cli_install#cs_cli_configure)
 - [Git CLI client](https://git-scm.com/downloads) installed
 
 ## Estimated time
@@ -20,8 +21,7 @@ It should take you about 1 hour to complete this tutorial.
 
 ## Steps
 
-1. [Enable Knative add-on on IBM Cloud Kubernetes Service.](./step1)
-2. [Link a service to an Event importer](./step2)
+1. [Link a service to an Event importer](./step2)
 2. [Use `Channel` and `Subscription` to manage events and subscriptions.](./step3)
 3. [Use `Broker` and `Trigger` to manage events and subscriptions.](./step4)
 4. [Add `Filter` to `Trigger`](./step5)

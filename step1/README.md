@@ -1,104 +1,169 @@
-# Enable Knative add-on on IBM Cloud Kubernetes Service
+# Link a service to an Event importer
 
-Managed Knative add-on on IBM Cloud Kubernetes Service is an easy way to enhance your Kubernetes cluster with Serverless capabilities. It will install IBM tested version of Knative and Istio directly on your IBM Cloud Kubernetes cluster.
+Event sources in Knative are defined by Kubernetes Custom Resources. There are a list of predefined event sources in Knative. Using `SINK` to refer to a Knative service when creating an event source is the simpliest way to consume an event. Here we use `Cronjob` as a sample.
 
-## Prerequisites
+![](../images/knative-simplemode.png)
 
-* A IBM Kubernetes Service cluster is provisioned, at least with 2 worker nodes.
-* IBM Cloud CLI installed.
-* Kubernetes CLI installed.
+## 1. Create a Knative service `event-display`
 
-## 第一步：使用IBM Cloud命令行工具安装
-
-在CloudShell窗口中执行下面的命令，这个命令会自动安装Istio和Knative。
+由于Knative Service自带一个域名可以访问，所以我们创建一个Knative Service作为可访问的对象，来接受事件消息。输入下面的命令，创建`event-display`服务：
 
 ```text
-ibmcloud ks cluster-addon-enable knative --cluster $MYCLUSTER
+kubectl apply --filename service.yaml 
 ```
 
-当提示`Enable istio? [y/N]>`输入y。期待输出：
+期待输出：
 ```
-Enabling add-on knative for cluster knative-guoyc...
-The istio add-on version 1.1.7 is required to enable the knative add-on. Enable istio? [y/N]> y
-OK
+Service 'event-display' successfully created in namespace 'default'.
 ```
-整个安装过程大约需要几分钟，请耐心等待，可以通过下面步骤检查安装进程。
 
-## 第二步：检查安装后的Knative
+通过下面命令检查该服务已经创建完成，`READY`那栏显示 `True`。如果还没有，请等待一段时间:
 
-在CloudShell窗口中执行下面的命令，观察Knative的安装过程，以及安装的组件。
+```text
+kubectl get ksvc
+```
 
-1. 列出所有的名称空间，其中knative-\*以及istio-system是安装的名称空间：
+期待输出：
+```
+NAME            DOMAIN                                                                   GENERATION   AGE   CONDITIONS   READY   REASON
+event-display   event-display-default.knative1-guoyc.au-syd.containers.appdomain.cloud   1            32s   3 OK / 3     True
+```
 
-   ```text
-   kubectl get namespace
-   ```
-   期待输出：
-   ```
-   NAME                 STATUS    AGE
-   default              Active    30m
-   ibm-cert-store       Active    20m
-   ibm-system           Active    28m
-   istio-system         Active    5m20s
-   knative-build        Active    5m14s
-   knative-eventing     Active    5m14s
-   knative-monitoring   Active    5m14s
-   knative-serving      Active    5m14s
-   knative-sources      Active    5m14s
-   kube-public          Active    30m
-   kube-system          Active    30m
-   ```
+## 步骤二：创建Cronjob事件源
 
-2. Istio需要先于Knative安装。观察istio-system下面的pod，直到都进入running状态：
+Knative预先安装了定时事件源类型CronJobSource，可以用这个事件源来定时发送事件消息。
 
-   ```text
-   watch kubectl get pods -n istio-system
-   ```
-   期待输出：
-   ```
-   NAME                                     READY     STATUS    RESTARTS   AGE
-   cluster-local-gateway-5897bf4bdd-fr544   1/1       Running   0          4m51s
-   istio-citadel-6f58d87c48-b9v5f           1/1       Running   0          5m32s
-   istio-egressgateway-5ffbbb468-c5t6j      1/1       Running   0          5m32s
-   istio-galley-65bcc9b6f7-czqmp            1/1       Running   0          5m32s
-   istio-ingressgateway-85787c5976-2vwsp    1/1       Running   0          5m32s
-   istio-pilot-77d74c888-nqzbq              2/2       Running   0          5m32s
-   istio-policy-7f79dbbdc7-2tffd            2/2       Running   5          5m32s
-   istio-sidecar-injector-68c4dc865-p8r7v   1/1       Running   0          5m31s
-   istio-telemetry-697d4cf64-vmgzf          2/2       Running   6          5m31s
-   prometheus-7d6678d744-swb6q              1/1       Running   0          5m31s
-   ```
+1. 创建Cronjob事件源
 
-   输入`ctrl+c`结束观察进程。
+    我们先来看一下`cronjob.yaml`的内容，这里描述了定时事件源的配置信息：
+    ```text
+    cat cronjob.yaml
+    ```
 
-1. Knative将安装完Istio之后开始安装。观察knative-serving下面的pod，直到都进入running状态：
+    期待输出：
+    ```
+    apiVersion: sources.eventing.knative.dev/v1alpha1
+    kind: CronJobSource
+    metadata:
+    name: cronjobs
+    spec:
+      schedule: "*/1 * * * *"
+      data: "{\"message\": \"Hello world!\"}"
+      sink:
+        apiVersion: serving.knative.dev/v1alpha1
+        kind: Service
+        name: event-display
+    ```
 
-   ```text
-   watch kubectl get pods -n knative-serving
-   ```
-   期待输出：
-   ```
-   NAME                                     READY     STATUS    RESTARTS   AGE
-   activator-54f5ff5cc7-6vrlt               2/2       Running   1          4m33s
-   autoscaler-6f4965c9bd-w997f              2/2       Running   0          4m33s
-   controller-5b9bfd9594-d9bsv              1/1       Running   0          4m33s
-   networking-certmanager-d8c475984-l97j8   1/1       Running   0          4m33s
-   networking-istio-76d4b55fd4-cf6q5        1/1       Running   0          4m33s
-   webhook-75bcf549-dq587                   1/1       Running   0          4m33s
-   ```
+    可以看到，它的`spec`主要包含三部分内容：
+    - schedule: 定时任务的周期，这里`"*/1 * * * *"`表示为定时1分钟。
+    - data: 定义了事件消息中数据部分的内容。CloudEvent标准消息将包括这个数据，将从事件源发送出去。
+    - sink: 定义了事件数据传送的目的地，这里可以看到是Knative服务 `event-display`，也就是我们刚才创建的服务。
 
-   输入`ctrl+c`结束观察。
+    通过下面命令创建事件源`cronjobs`:
 
-恭喜您已经完成了Knative的安装！可以进行下面的实验了。
+    ```text
+    kubectl apply -f cronjob.yaml
+    ```
 
-## More information
+    期待输出：
+    ```
+    cronjobsource.sources.eventing.knative.dev/cronjobs created
+    ```
+    
+2. 检查该事件源已经被创建:
 
-1. Run below command to uninstall knative add-on and istio add-on.
+    ```text
+    kubectl get cronjobsource
+    ```
 
-   ```text
-   ibmcloud ks cluster-addon-disable knative --cluster $MYCLUSTER
-   ibmcloud ks cluster-addon-disable istio --cluster $MYCLUSTER
-   ```
+    期待输出：
+    ```
+    NAME       AGE
+    cronjobs   44s
+    ```
 
+## 步骤三：检查event-display的日志
 
+事件源`cronjobs`每隔1分钟，就会发送一条事件给`event-display`，`event-display`将把它打印到日志中。在这个逻辑的背后，是两个Kubernetes Pod在运行。
+
+1. 查看运行Pod
+
+    下面命令将列出所有运行的Pod：
+    ```
+    kubectl get pods
+    ```
+
+    期待输出：
+    ```
+    NAME                                              READY   STATUS    RESTARTS   AGE
+    cronjob-cronjobs-tlzm9-7d4f79bbc8-krb8q           1/1     Running   0          98s
+    event-display-46hhp-deployment-597487d855-7ctj5   2/2     Running   0          37s
+    ```
+
+    其中，`cronjob-cronjobs-`为前缀的Pod，就是定时事件源，而`event-display-`为前缀的Pod，则是事件消息的展示应用。
+
+2. 查看`event-display`的日志
+
+    下面我们查看`event-display`的日志：
+    ```
+    kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
+    ```
+
+    能看到日志显示的CloudEvent标准消息如下面所示：
+    ```
+    _  CloudEvent: valid _
+    Context Attributes,
+    SpecVersion: 0.2
+    Type: dev.knative.cronjob.event
+    Source: /apis/v1/namespaces/default/cronjobsources/cronjobs
+    ID: 1e269ba0-114f-41d6-a889-dcdebaa0a73d
+    Time: 2019-06-20T14:23:00.000371555Z
+    ContentType: application/json
+    Transport Context,
+    URI: /
+    Host: event-display.default.svc.cluster.local
+    Method: POST
+    Data,
+    {
+        "message": "Hello world!"
+    }
+    ```
+    这说明了`cronjobs`创建后，定时产生CloudEvent标准格式的事件消息，这个消息被`event-display`接收并打印在日志中。
+
+    观察完毕，使用`ctrl + c`结束进程。
+
+## 步骤四：删除事件源
+
+现在我们先删除`cronjobs`，因为接下来的实验我们将采用其他方法管理事件和订阅：
+
+```
+kubectl delete -f cronjob.yaml
+```
+
+期待输出：
+```
+cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
+```
+
+`event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。
+
+```
+kubectl get pods
+```
+
+可能的输出：
+```
+NAME                                              READY   STATUS    RESTARTS   AGE
+event-display-rpxcz-deployment-58676c965b-2j6jl   2/2     Running   0          3m46s
+```
+或者
+```
+NAME                                              READY   STATUS        RESTARTS   AGE
+event-display-rpxcz-deployment-58676c965b-2j6jl   2/2     Terminating   0          4m14s
+```
+或者
+```
+No resources found.
+```
 
