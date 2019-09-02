@@ -17,14 +17,13 @@ Before you begin, you’ll need the following:
 
 ## Estimated time
 
-It should take you about 1 hour to complete this tutorial.
+It should take you about 30 minutes to complete this tutorial.
 
 ## Steps
 
-1. [Link a service to an Event importer](./step2)
-2. [Use `Channel` and `Subscription` to manage events and subscriptions.](./step3)
-3. [Use `Broker` and `Trigger` to manage events and subscriptions.](./step4)
-4. [Add `Filter` to `Trigger`](./step5)
+1. [Link a service to an Event importer](./step1)
+3. [Use `Broker` and `Trigger` to manage events and subscriptions.](./step2)
+4. [Add `Filter` to `Trigger`](./step3)
 
 ## Summary
 

@@ -1,46 +1,46 @@
 # Link a service to an Event importer
 
-Event sources in Knative are defined by Kubernetes Custom Resources. There are a list of predefined event sources in Knative. Using `SINK` to refer to a Knative service when creating an event source is the simpliest way to consume an event. Here we use `Cronjob` as a sample.
+Event sources in Knative are defined by Kubernetes Custom Resources. There are a list of predefined event sources in Knative. Creating an event source importer and using `SINK` to link to a Knative service is the simpliest way to consume an event. Here we use `Cronjob` as a sample.
 
 ![](../images/knative-simplemode.png)
 
 ## 1. Create a Knative service `event-display`
 
-由于Knative Service自带一个域名可以访问，所以我们创建一个Knative Service作为可访问的对象，来接受事件消息。输入下面的命令，创建`event-display`服务：
+Firstly, we create a Knative service `event-display` by:
 
 ```text
 kubectl apply --filename service.yaml 
 ```
 
-期待输出：
+Expected output:
 ```
 Service 'event-display' successfully created in namespace 'default'.
 ```
 
-通过下面命令检查该服务已经创建完成，`READY`那栏显示 `True`。如果还没有，请等待一段时间:
+Run below command and check if the status `READY` of this Knative service is `True`:
 
 ```text
 kubectl get ksvc
 ```
 
-期待输出：
+Expected output：
 ```
 NAME            DOMAIN                                                                   GENERATION   AGE   CONDITIONS   READY   REASON
 event-display   event-display-default.knative1-guoyc.au-syd.containers.appdomain.cloud   1            32s   3 OK / 3     True
 ```
 
-## 步骤二：创建Cronjob事件源
+## 2. Create a CronJobSource
 
-Knative预先安装了定时事件源类型CronJobSource，可以用这个事件源来定时发送事件消息。
+CronJobSource is a predefined event source which uses an in-memory timer to produce events on the specified Cron schedule.
 
-1. 创建Cronjob事件源
+1. Create a cron job
 
-    我们先来看一下`cronjob.yaml`的内容，这里描述了定时事件源的配置信息：
+    Review the content of `cronjob.yaml`, which describes a definition of a cron job:
     ```text
     cat cronjob.yaml
     ```
 
-    期待输出：
+    Expected output:
     ```
     apiVersion: sources.eventing.knative.dev/v1alpha1
     kind: CronJobSource
@@ -55,29 +55,29 @@ Knative预先安装了定时事件源类型CronJobSource，可以用这个事件
         name: event-display
     ```
 
-    可以看到，它的`spec`主要包含三部分内容：
-    - schedule: 定时任务的周期，这里`"*/1 * * * *"`表示为定时1分钟。
-    - data: 定义了事件消息中数据部分的内容。CloudEvent标准消息将包括这个数据，将从事件源发送出去。
-    - sink: 定义了事件数据传送的目的地，这里可以看到是Knative服务 `event-display`，也就是我们刚才创建的服务。
+    There are three parameters in the `spec` of a CronJobSource:
+    - schedule: a cron format string. Here `"*/1 * * * *"` means every minute
+    - data: the data to be posted to the target, in CloudEvent format.
+    - sink: the URI messages will be forwarded on to. Here we use `event-display`, which is the Knative service we just created.
 
-    通过下面命令创建事件源`cronjobs`:
+    Create the CronJobSource `cronjobs` by running below command:
 
     ```text
     kubectl apply -f cronjob.yaml
     ```
 
-    期待输出：
+    Expected output:
     ```
     cronjobsource.sources.eventing.knative.dev/cronjobs created
     ```
     
-2. 检查该事件源已经被创建:
+2. Check if the cron job is created by running:
 
     ```text
     kubectl get cronjobsource
     ```
 
-    期待输出：
+    Expected output:
     ```
     NAME       AGE
     cronjobs   44s
