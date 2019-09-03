@@ -1,104 +1,61 @@
 # Use `Broker` and `Trigger` to manage events and subscriptions
 
-We use `GithubSource` as the example. We will create a broker and a subscription.
+If we want to hide the details of event routing from the event producer and event consumer, we can use `Broker` and `Trigger` to manage events and subscriptions. An event producer will send events to `Broker` without any knowledge of event consumers. An event consumer will register its interests to events by `Trigger` without any knowledge of event producers. Events will be routed to any subscribers who are interested in that event by Knative Eventing platform.
 
-Events are sent to the Broker’s ingress and are then sent to any subscribers that are interested in that event.
+![](https://github.com/daisy-ycguo/knativelab/raw/master/images/Knative-triggermode.png)
 
-## Step 0. Check the default channel configuration \(optional\)
 
-There are a few channel provisioner pre-installed in Knative. You can check all pre-installed channel provisioner by:
+## 1. Create a default `Broker`
+
+A Broker represents an ‘event mesh’. The easiest way to create a Broker is to annotate your namespace by:
 
 ```text
-$ kubectl get ClusterChannelProvisioner -n knative-eventing
-NAME                READY     REASON    AGE
-in-memory           True                1h
-in-memory-channel   True                1h
+kubectl label namespace default knative-eventing-injection=enabled
 ```
 
-There is a default channel configuration specified in the ConfigMap named `default-channel-webhook` in the `knative-eventing` namespace. This ConfigMap may specify a cluster-wide default channel provisioner and namespace-specific channel provisioners.
-
-```text
-$ kubectl get configmap default-channel-webhook -n knative-eventing -o jsonpath='{.data}'
-map[default-channel-config:clusterdefault:
-  apiversion: eventing.knative.dev/v1alpha1
-  kind: ClusterChannelProvisioner
-  name: in-memory
-namespacedefaults:
-  some-namespace:
-    apiversion: eventing.knative.dev/v1alpha1
-    kind: ClusterChannelProvisioner
-    name: some-other-provisioner
+Expected output:
 ```
-
-In this ConfigMap, we can see the cluster-wide default channel provisioner is set to `in-memory`.
-
-## Step 1. Create a default broker
-
-Enter the following commands:
-
-```text
-$ kubectl label namespace default knative-eventing-injection=enabled
 namespace/default labeled
 ```
 
-Check the default broker is created:
-
+Check if the broker has been created by:
 ```text
-$ kubectl get broker
+kubectl get broker
+```
+
+Expected output:
+```
 NAME      READY     REASON    HOSTNAME                                   AGE
 default   True                default-broker.default.svc.cluster.local   14s
 ```
 
-```text
-$ kubectl get broker default -o yaml
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Broker
-metadata:
-  creationTimestamp: 2019-06-18T09:36:13Z
-  generation: 1
-  labels:
-    eventing.knative.dev/namespaceInjected: "true"
-  name: default
-  namespace: default
-  resourceVersion: "16855"
-  selfLink: /apis/eventing.knative.dev/v1alpha1/namespaces/default/brokers/default
-  uid: 83792b80-91ac-11e9-ae97-72b4e0ade7ac
-spec: {}
-status:
-  address:
-    hostname: default-broker.default.svc.cluster.local
-  conditions:
-  - lastTransitionTime: 2019-06-18T09:36:15Z
-    status: "True"
-    type: Addressable
-  - lastTransitionTime: 2019-06-18T09:36:22Z
-    status: "True"
-    type: FilterReady
-  - lastTransitionTime: 2019-06-18T09:36:16Z
-    status: "True"
-    type: IngressChannelReady
-  - lastTransitionTime: 2019-06-18T09:36:25Z
-    status: "True"
-    type: IngressReady
-  - lastTransitionTime: 2019-06-18T09:36:15Z
-    status: "True"
-    type: IngressSubscriptionReady
-  - lastTransitionTime: 2019-06-18T09:36:25Z
-    status: "True"
-    type: Ready
-  - lastTransitionTime: 2019-06-18T09:36:14Z
-    status: "True"
-    type: TriggerChannelReady
+Please notice the status `READY` of broker is `True`.
+
+Now you can check the running pods serving for brokers by below command line:
+```
+kubectl get pods
 ```
 
-## Step 2. Create a heartbeats event source
+Expected output:
+```
+NAME                                              READY   STATUS    RESTARTS   AGE
+default-broker-filter-798df8bc75-77m2r            1/1     Running   0          43s
+default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          43s
+```
+The pod `default-broker-ingress-*` is responsible for receiving event messages; the pod `default-broker-filter-*` is responsible for forwarding event messages to interested targets.
 
-Now we create a heartbeats event source, which will generate event message in a fixed interval to the default broker.
+## 2. Create a heart beats event source
 
-Check the configuration of ContainerSource `heartbeats-sender`. Note the `sink` is configured to Broker `default`.
+ContainerSource is predefined event source which will keep a single Pod running with the specified image, environment, and arguments as an event producer. Now we use ContainerSource to create a heart beats event source, producing events at the specified interval. The image URI of this event source is `docker.io/daisyycguo/heartbeats-6790335e994243a8d3f53b967cdd6398`.
+
+Look at the content of `heartbeats.yaml`, which describes the configuration of a heart beats event source:
 
 ```text
-$ cat heartbeats.yaml
+cat heartbeats.yaml
+```
+
+Expected output:
+```
 apiVersion: sources.eventing.knative.dev/v1alpha1
 kind: ContainerSource
 metadata:
@@ -115,30 +72,46 @@ spec:
     - name: POD_NAME
       value: "heartbeats"
     - name: POD_NAMESPACE
-      value: "default"daisyyings-mbp:brokertrigger
+      value: "default"
 ```
 
-Create the ContainerSource `heartbeats-sender` by:
+There are four parameters in the `spec` of a ContainerSource:
+- image: the image URL that running inside the event source pod.
+- args and env: environment and arguments to the running container.
+- sink: the URI messages will be forwarded on to. Here we use the created default broker.
 
+Create a ContainerSource `heartbeats-sender` by running:
 ```text
-$ kubectl apply -f heartbeats.yaml
+kubectl apply -f heartbeats.yaml
+```
+
+Expected output:
+```
 containersource.sources.eventing.knative.dev/heartbeats-sender created
 ```
 
-Check the ContainerSource `heartbeats-sender` is created by:
-
+Check if `heartbeats-sender` has been created by:
 ```text
-$ kubectl get ContainerSource
+kubectl get ContainerSource
+```
+
+Expected output:
+```
 NAME                AGE
 heartbeats-sender   2m
 ```
 
-## Step 3. Create a trigger to add a subscriber to the broker.
+## 3. Create a Trigger to add a subscriber to default broker
 
-A Trigger represents a desire to subscribe to events from a specific Broker. We will use the service `event-display` to subscribe to the default broker. You will be able to see the event messages sent to broker.
+A Trigger represents a desire to subscribe to events from a specific Broker. We create a Trigger to have Knative service `event-display` to subscribe to the events sent to default Broker.
 
+Look at the content of `trigger1.yaml`, which describe a definition of a Trigger:
 ```text
-$ cat trigger1.yaml
+cat trigger1.yaml
+```
+
+Expected output:
+```
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:
@@ -148,48 +121,82 @@ spec:
     ref:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
-      name: event-displaydaisyyings-mbp:brokertrigger
+      name: event-display
 ```
 
-Create the trigger by:
+You can see a `subscriber` is defined in its `spec`, which refer to a Knative service `event-display`:
 
+Run below command to create a Trigger `mytrigger`:
 ```text
-$ kubectl apply -f trigger1.yaml
+kubectl apply -f trigger1.yaml
+```
+
+Expected output:
+```
 trigger.eventing.knative.dev/mytrigger created
 ```
 
-Check the trigger is created by:
-
+Check if Trigger has been created:
 ```text
-$ kubectl get trigger
+kubectl get trigger
+```
+
+Expected output:
+```
 NAME        READY     REASON    BROKER    SUBSCRIBER_URI                                    AGE
 mytrigger   True                default   http://event-display.default.svc.cluster.local/   29s
 ```
 
-Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
+## 4. Look at the logs of event-display
 
-```text
-$ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
-☁️  cloudevents.Event
-Validation: valid
+List running Pods and see if the pod `event-display-*` is running: 
+```
+kubectl get pods
+```
+
+Expected output:
+```
+NAME                                              READY   STATUS    RESTARTS   AGE
+default-broker-filter-798df8bc75-77m2r            1/1     Running   0          4m32s
+default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          4m32s
+event-display-46hhp-deployment-597487d855-dm77n   2/2     Running   0          19s
+heartbeats-sender-dhnz8-569967d749-8wbwt          1/1     Running   0          3m36s
+```
+
+Check the log of `event-display`:
+```
+kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
+```
+
+You can see the event messages in CloudEvent format as below：
+```
+_  CloudEvent: valid _
 Context Attributes,
-  specversion: 0.2
-  type: dev.knative.eventing.samples.heartbeat
-  source: https://github.com/knative/eventing-sources/cmd/heartbeats/#default/heartbeats
-  id: f073a7c0-5a52-494b-bcd9-2ee59e2091f5
-  time: 2019-06-18T10:55:44.21137922Z
-  contenttype: application/json
-Extensions,
-  beats: true
-  heart: yes
-  knativehistory: default-broker-dtszb-channel-vxw4k.default.svc.cluster.local
-  the: 42
+  SpecVersion: 0.2
+  Type: dev.knative.eventing.samples.heartbeat
+  Source: https://github.com/knative/eventing-sources/cmd/heartbeats/#default/heartbeats
+  ID: 5fff8cd4-96c5-4fd6-b116-2a96977791e2
+  Time: 2019-06-20T16:04:08.921707135Z
+  ContentType: application/json
+  Extensions:
+    beats: true
+    heart: yes
+    knativehistory: default-broker-tp97m-channel-znkp9.default.svc.cluster.local
+    the: 42
+Transport Context,
+  URI: /
+  Host: event-display.default.svc.cluster.local
+  Method: POST
 Data,
   {
-    "id": 3,
+    "id": 26,
     "label": ""
   }
 ```
 
-Terminate this process by `ctrl+c`.
+The event message from heart beat event source has been printed to logs. It demostrated that the event source `heartbeats-sender` sent the events to Broker, and Broker forwards to `event-display`.
+
+Terminate the process by `ctrl + c`.
+
+
 

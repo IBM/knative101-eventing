@@ -83,34 +83,32 @@ CronJobSource is a predefined event source which uses an in-memory timer to prod
     cronjobs   44s
     ```
 
-## 步骤三：检查event-display的日志
+## 3. Look at the logs of `event-display`
 
-事件源`cronjobs`每隔1分钟，就会发送一条事件给`event-display`，`event-display`将把它打印到日志中。在这个逻辑的背后，是两个Kubernetes Pod在运行。
+The event source `cronjobs` will send a event message to `event-display` every minute. `event-display` will print the message to logs. You can check the running pods on Kubernetes.
 
-1. 查看运行Pod
+1. List running Pods by:
 
-    下面命令将列出所有运行的Pod：
     ```
     kubectl get pods
     ```
 
-    期待输出：
+    Expected output:
     ```
     NAME                                              READY   STATUS    RESTARTS   AGE
     cronjob-cronjobs-tlzm9-7d4f79bbc8-krb8q           1/1     Running   0          98s
     event-display-46hhp-deployment-597487d855-7ctj5   2/2     Running   0          37s
     ```
 
-    其中，`cronjob-cronjobs-`为前缀的Pod，就是定时事件源，而`event-display-`为前缀的Pod，则是事件消息的展示应用。
+    The pod named as `cronjob-cronjobs-*` is the cron job event source. The pod named as `event-display-*` is the Knative service `event-display` which will print event message to logs.
 
-2. 查看`event-display`的日志
+2. Check the logs of `event-display` by:
 
-    下面我们查看`event-display`的日志：
     ```
     kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
     ```
 
-    能看到日志显示的CloudEvent标准消息如下面所示：
+    Expected output:
     ```
     _  CloudEvent: valid _
     Context Attributes,
@@ -129,41 +127,22 @@ CronJobSource is a predefined event source which uses an in-memory timer to prod
         "message": "Hello world!"
     }
     ```
-    这说明了`cronjobs`创建后，定时产生CloudEvent标准格式的事件消息，这个消息被`event-display`接收并打印在日志中。
+    It shows that Knative service `event-display` gets event messages sent from CronJobSource `cronjobs`.
 
-    观察完毕，使用`ctrl + c`结束进程。
+    Terminate this process by `ctrl + c`.
 
-## 步骤四：删除事件源
+## 4. Delete event source
 
-现在我们先删除`cronjobs`，因为接下来的实验我们将采用其他方法管理事件和订阅：
+Use below command to delete `cronjobs`:
 
 ```
 kubectl delete -f cronjob.yaml
 ```
 
-期待输出：
+Expected output:
 ```
 cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
 ```
 
-`event-display`并没有删除，我们还将在下面的实验中用到它。但因为它是Serverless的服务，一段时间不被调用将会被平台自动收回。
-
-```
-kubectl get pods
-```
-
-可能的输出：
-```
-NAME                                              READY   STATUS    RESTARTS   AGE
-event-display-rpxcz-deployment-58676c965b-2j6jl   2/2     Running   0          3m46s
-```
-或者
-```
-NAME                                              READY   STATUS        RESTARTS   AGE
-event-display-rpxcz-deployment-58676c965b-2j6jl   2/2     Terminating   0          4m14s
-```
-或者
-```
-No resources found.
-```
+We don't delete Knative service `event-display` because we will use it in the following labs. 
 

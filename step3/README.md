@@ -1,6 +1,10 @@
-# Add Filter to Trigger
+# Define a Filter
 
-We add another event source `CronJobs` which will also send event messages to default broker. We use Filter in Trigger to subscribe only a specific type of event messages.
+Multiple kinds of events can be sent to a same broker. If you are interested in a specific event source, you can use Filter in Trigger to subsribe a specific type of events.
+
+Here we create a second event source `CronJobs` and send events to default broker. Then we use Filter to subscribe to a specific type of events.
+
+![](https://github.com/daisy-ycguo/knativelab/raw/master/images/Knative-triggermode.png)
 
 ## Step 1. Create another event source CronJobs
 
@@ -13,6 +17,8 @@ $ kubectl get CronJobSource
 NAME       AGE
 cronjobs   23s
 ```
+
+Remember we already have heart beat events in the default Broker. If we add another event source `CronJobs` who also sends events to default broker, we will get two kinds of events in the Broker. 
 
 Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
 
