@@ -2,7 +2,7 @@
 
 If we want to hide the details of event routing from the event producer and event consumer, we can use `Broker` and `Trigger` to manage events and subscriptions. An event producer will send events to `Broker` without any knowledge of event consumers. An event consumer will register its interests to events by `Trigger` without any knowledge of event producers. Events will be routed to any subscribers who are interested in that event by Knative Eventing platform.
 
-![](https://github.com/daisy-ycguo/knativelab/raw/master/images/Knative-triggermode.png)
+![](../images/knative-triggermode.png)
 
 
 ## 1. Create a default `Broker`

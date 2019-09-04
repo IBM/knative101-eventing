@@ -4,7 +4,7 @@ Multiple kinds of events can be sent to a same broker. If you are interested in 
 
 Here we create a second event source `CronJobs` and send events to default broker. Then we use Filter to subscribe to a specific type of events.
 
-![](https://github.com/daisy-ycguo/knativelab/raw/master/images/Knative-triggermode.png)
+![](../images/knative-filtermode.png)
 
 ## Step 1. Create another event source CronJobs
 
