@@ -1,9 +1,10 @@
 # Use `Broker` and `Trigger` to manage events and subscriptions
 
-If we want to hide the details of event routing from the event producer and event consumer, we can use `Broker` and `Trigger` to manage events and subscriptions. An event producer will send events to `Broker` without any knowledge of event consumers. An event consumer will register its interests to events by `Trigger` without any knowledge of event producers. Events will be routed to any subscribers who are interested in that event by Knative Eventing platform.
+If we want to hide the details of event routing from the event producer and event consumer, we can use `Broker` and `Trigger` to manage events and subscriptions. An event producer can send events to `Broker` without any knowledge of event consumers. An event consumer can register its interests to events by `Trigger` without any knowledge of event producers. Events will be routed to any subscribers who are interested in that event by Knative Eventing platform.
 
 ![](../images/knative-triggermode.png)
 
+In this lab, we create a heart beats event importer, specifing a default broker as the `SINK`. Events emitted from the event producer will be sent to the default broker. And then we define a `Trigger` to subscribe a Knative service to all events in default broker.
 
 ## 1. Create a default `Broker`
 
@@ -42,7 +43,7 @@ NAME                                              READY   STATUS    RESTARTS   A
 default-broker-filter-798df8bc75-77m2r            1/1     Running   0          43s
 default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          43s
 ```
-The pod `default-broker-ingress-*` is responsible for receiving event messages; the pod `default-broker-filter-*` is responsible for forwarding event messages to interested targets.
+The pod `default-broker-ingress-*` is responsible for receiving events; the pod `default-broker-filter-*` is responsible for forwarding events to interested targets.
 
 ## 2. Create a heart beats event source
 
@@ -78,7 +79,7 @@ spec:
 There are four parameters in the `spec` of a ContainerSource:
 - image: the image URL that running inside the event source pod.
 - args and env: environment and arguments to the running container.
-- sink: the URI messages will be forwarded on to. Here we use the created default broker.
+- sink: the URI events will be forwarded on to. Here we use the created default broker.
 
 Create a ContainerSource `heartbeats-sender` by running:
 ```text
@@ -168,7 +169,7 @@ Check the log of `event-display`:
 kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
-You can see the event messages in CloudEvent format as below：
+You can see the events in CloudEvent format as below：
 ```
 _  CloudEvent: valid _
 Context Attributes,
@@ -194,7 +195,7 @@ Data,
   }
 ```
 
-The event message from heart beat event source has been printed to logs. It demostrated that the event source `heartbeats-sender` sent the events to Broker, and Broker forwards to `event-display`.
+The events from heart beat event source have been printed to logs. It demostrated that the event source `heartbeats-sender` sent the events to Broker, and Broker forwards to `event-display`.
 
 Terminate the process by `ctrl + c`.
 

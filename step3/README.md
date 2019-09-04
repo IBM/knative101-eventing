@@ -20,7 +20,7 @@ cronjobs   23s
 
 Remember we already have heart beat events in the default Broker. If we add another event source `CronJobs` who also sends events to default broker, we will get two kinds of events in the Broker. 
 
-Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
+Check the logs of `event-display`, you can see that both events from `heartbeats` and `cronjob`:
 
 ```text
 $ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
@@ -145,7 +145,7 @@ status:
   subscriberURI: http://event-display.default.svc.cluster.local/
 ```
 
-Check the logs of `event-display`, you will see that only messages from `cronjob` now:
+Check the logs of `event-display`, you will see that only events from `cronjob` now:
 
 ```text
 $ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container

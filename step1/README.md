@@ -1,6 +1,8 @@
-# Use `Importer` to link an event consumer to an event producer
+# Use `Importer` to define event producer-consumer
 
-Event importers in Knative are defined by Kubernetes Custom Resources. There are a list of predefined event sources in Knative. Creating an event source importer and using `SINK` to link to a Knative service is the simpliest way to consume an event. Here we use `Cronjob` as a sample.
+Event `Importer`, defined by Kubernetes Custom Resources, represent event producers which emit events from an external system. There are a list of predefined [event importers](https://knative.dev/v0.3-docs/eventing/sources/) in Knative. Event `Importer` has a field `SINK` in its spec which is used to specify an `addressable` object as event consumer. For example, Knative service has an access URL defined in its `status.address.hostname` field. Knative service is able to receive and acknowledge an event delivered over HTTP to this URL address. So Knative service can be defined as an event consumer.
+
+In this lab, we create an `CronJobSource` importer as event producer and specify a Knative service with `SINK` field as event consumer. Thus, an event producer and an event consumer are binded in the `Importer` definition. The events emitted from event producer will be sent to event consumer directly.
 
 ![](../images/knative-simplemode.png)
 
