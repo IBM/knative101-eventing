@@ -14,7 +14,7 @@ kubectl apply --filename service.yaml
 
 Expected output:
 ```
-Service 'event-display' successfully created in namespace 'default'.
+service.serving.knative.dev/event-display created
 ```
 
 Run below command and check if the status `READY` of this Knative service is `True`:
@@ -25,8 +25,8 @@ kubectl get ksvc
 
 Expected output：
 ```
-NAME            DOMAIN                                                                   GENERATION   AGE   CONDITIONS   READY   REASON
-event-display   event-display-default.knative1-guoyc.au-syd.containers.appdomain.cloud   1            32s   3 OK / 3     True
+NAME            URL                                                                              LATESTCREATED         LATESTREADY           READY     REASON
+event-display   http://event-display-default.mycluster-guoyc.au-syd.containers.appdomain.cloud   event-display-6mcvg   event-display-6mcvg   True
 ```
 
 ## 2. Create a CronJobSource

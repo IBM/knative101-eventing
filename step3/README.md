@@ -23,37 +23,58 @@ Remember we already have heart beat events in the default Broker. If we add anot
 Check the logs of `event-display`, you can see that both messages from `heartbeats` and `cronjob`:
 
 ```text
-$ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
+$ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
-Event message from `cronjob`:
+Expected output looks like:
 
 ```text
-☁️  cloudevents.Event
-Validation: valid
+☁️  CloudEvent: valid ✅
 Context Attributes,
-  specversion: 0.2
-  type: dev.knative.cronjob.event
-  source: /apis/v1/namespaces/default/cronjobsources/cronjobs
-  id: b611a8c8-0966-4f91-a4d7-ec4add50da7a
-  time: 2019-06-18T10:59:00.000387176Z
-  contenttype: application/json
-Extensions,
-  knativehistory: default-broker-dtszb-channel-vxw4k.default.svc.cluster.local
+  SpecVersion: 0.3
+  Type: dev.knative.cronjob.event
+  Source: /apis/v1/namespaces/default/cronjobsources/cronjobs
+  ID: 14d13807-1ef6-4ffe-ad54-abfe9f9411a8
+  Time: 2019-09-04T08:29:00.009199062Z
+  DataContentType: application/json
+  Extensions:
+    knativehistory: default-kn2-trigger-kn-channel.default.svc.cluster.local
+    kn00timeinflight: 2019-09-04T08:29:00.013373521Z
+Transport Context,
+  URI: /
+  Host: event-display.default.svc.cluster.local
+  Method: POST
 Data,
   {
     "message": "Hello world!"
   }
+
+☁️  CloudEvent: valid ✅
+Context Attributes,
+  SpecVersion: 0.3
+  Type: dev.knative.eventing.samples.heartbeat
+  Source: https://github.com/knative/eventing-sources/cmd/heartbeats/#default/heartbeats
+  ID: 78986ebe-be65-44b9-87d1-602718ff5514
+  Time: 2019-09-04T08:29:00.361296485Z
+  DataContentType: application/json
+  Extensions:
+    kn00timeinflight: 2019-09-04T08:29:00.361821752Z
+    knativehistory: default-kn2-trigger-kn-channel.default.svc.cluster.local
+    beats: true
+    heart: yes
+    the: 42
+Transport Context,
+  URI: /
+  Host: event-display.default.svc.cluster.local
+  Method: POST
+Data,
+  {
+    "id": 17,
+    "label": ""
+  }
 ```
 
 Terminate this process by `ctrl+c`.
-
-Delete mytrigger by:
-
-```text
-$ kubectl delete -f trigger1.yaml
-trigger.eventing.knative.dev "mytrigger" deleted
-```
 
 ## Step 2. Define filter in trigger
 
@@ -79,8 +100,8 @@ spec:
 Create a new `mytrigger` with filter by applying the new version of yaml file:
 
 ```text
-$ kubectl apply -f trigger2.yaml
-trigger.eventing.knative.dev/mytrigger created.
+$ kubectl replace -f trigger2.yaml
+trigger.eventing.knative.dev/mytrigger replaced
 ```
 
 Check the new version of `mytrigger` that filter has been configured:
@@ -124,9 +145,27 @@ status:
   subscriberURI: http://event-display.default.svc.cluster.local/
 ```
 
-Check the logs of `event-display`, you can see that only messages from `cronjob` now:
+Check the logs of `event-display`, you will see that only messages from `cronjob` now:
 
 ```text
-$ kubectl logs -f event-display-w2xvz-deployment-78569995c5-vr868 user-container
+$ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
+Terminate this process by `ctrl+c`.
+
+## Step 3. Delete all
+
+Run below command to delete all the artifacts you craeted in this tutorial.
+
+```
+source deleteall.sh
+```
+
+Expected output:
+```
+trigger.eventing.knative.dev "mytrigger" deleted
+cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
+containersource.sources.eventing.knative.dev "heartbeats-sender" deleted
+service.serving.knative.dev "event-display" deleted
+daisyyings-mbp:step3 Daisy$ source deleteall.sh
+```
