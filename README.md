@@ -1,8 +1,14 @@
 # Knative Eventing 101
-Knative Eventing 101 Tutorials can help you understand Knative Eventing concepts.
+
+Learn how to enable a service to consume events on Knative Eventing
 
 ## Introduction
-Knative Eventing 101 Tutorials can help you understand Knative Eventing concepts.
+
+Knative Eventing is a system that is designed to address a common need for cloud native development and provides composable primitives to enable late-binding event producers and event consumers.
+
+In Knative, event producers and event consumers are designed to be independent. Any producer can generate events before there are active event consumers that are listening. Any event consumer can express interest in an event or class of events, before there are producers that are creating those events.
+
+This tutorial can help you understand Knative Eventing concepts and how to use these concepts to enable Knative service to consume events.
 
 ## Prerequisites
 
@@ -21,12 +27,13 @@ It should take you about 30 minutes to complete this tutorial.
 
 ## Steps
 
-1. [Link a service to an Event importer](./step1)
+1. [Use `Importer` to define event producer-consumer](./step1)
 3. [Use `Broker` and `Trigger` to manage events and subscriptions.](./step2)
 4. [Add `Filter` to `Trigger`](./step3)
 
 ## Summary
 
+In this tutorial, you learned two ways to consume events on Knative Eventing. With event `Importer`, you can directly link a event consumer to a producer and simply define an event message flow from a producer to a consumer. With `Broker` and `Trigger`, you can decouple event producers and consumers. `Broker` likes an event hub where all event producers send events to. `Trigger` describe event consumer and its intersted subscriptions to specific events, which enables late-binding event producers and event consumers.
 
 ## Related links
 
