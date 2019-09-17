@@ -1,14 +1,16 @@
-# Use `Importer` to define event producer-consumer
+# Subscribe to event producers by defining event sources
 
-Event `Importer`, defined by Kubernetes Custom Resources, represent event producers which emit events from an external system. There are a list of predefined [event importers](https://knative.dev/v0.3-docs/eventing/sources/) in Knative. Event `Importer` has a field `SINK` in its spec which is used to specify an `addressable` object as event consumer. For example, Knative service has an access URL defined in its `status.address.hostname` field. Knative service is able to receive and acknowledge an event delivered over HTTP to this URL address. So Knative service can be defined as an event consumer.
+Event sources represent event producers which emit events from an external system. There are a list of predefined [event sources](https://knative.dev/v0.3-docs/eventing/sources/) in Knative. The events emitted from event producer will be converted into standard `CloudEvent` message by adapters before they arrives at Knative Eventing data panel.
 
-In this lab, we create an `CronJobSource` importer as event producer and specify a Knative service with `SINK` field as event consumer. Thus, an event producer and an event consumer are binded in the `Importer` definition. The events emitted from event producer will be sent to event consumer directly.
+Event source has a field `SINK` in its spec which is used to specify an `addressable` object as event consumer. For example, Knative service has an access URL defined in its `status.address.hostname` field. Knative service is able to receive and acknowledge an event delivered over HTTP to this URL address. So Knative service can be defined as an event consumer.
+
+In this lab, we create an `CronJobSource` as event producer and specify a Knative service as the event consumer by specifying it as the `SINK` of `CronJobSource`. Thus, an event producer and an event consumer are binded in the event source definition. 
 
 ![](../images/knative-simplemode.png)
 
 ## 1. Create a Knative service `event-display`
 
-Firstly, we create a Knative service `event-display` by:
+Firstly, we create a Knative service `event-display` that prints incoming events to its log by:
 
 ```text
 kubectl apply --filename service.yaml 
@@ -30,6 +32,8 @@ Expected output：
 NAME            URL                                                                              LATESTCREATED         LATESTREADY           READY     REASON
 event-display   http://event-display-default.mycluster-guoyc.au-syd.containers.appdomain.cloud   event-display-6mcvg   event-display-6mcvg   True
 ```
+
+Please notice that you get a service URL here which you could use to access this service. We will use this URL in the following step.
 
 ## 2. Create a CronJobSource
 

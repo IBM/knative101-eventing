@@ -3,9 +3,7 @@ kind: Service
 metadata:
   name: event-display
 spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        spec:
-          container:
-            image: docker.io/daisyycguo/event_display-bb44423e21d22fe93666b961f6cfb013
+  template:
+    spec:
+      containers:
+        - image: gcr.io/knative-releases/github.com/knative/eventing-sources/cmd/event_display

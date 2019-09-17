@@ -4,7 +4,7 @@ Learn how to enable a service to consume events on Knative Eventing
 
 ## Introduction
 
-Knative Eventing is a system that is designed to address a common need for cloud native development and provides composable primitives to enable late-binding event producers and event consumers.
+Knative Eventing is a system that is designed to address a common need for cloud native development by providing composable primitives to enable late-binding between event producers and event consumers.
 
 In Knative, event producers and event consumers are designed to be independent. Any producer can generate events before there are active event consumers that are listening. Any event consumer can express interest in an event or class of events, before there are producers that are creating those events.
 
@@ -27,13 +27,13 @@ It should take you about 30 minutes to complete this tutorial.
 
 ## Steps
 
-1. [Use `Importer` to define event producer-consumer](./step1)
-3. [Use `Broker` and `Trigger` to manage events and subscriptions.](./step2)
+1. [Subscribe to event producers by defining event sources](./step1)
+3. [Manage events and subscriptions with `Broker` and `Trigger`](./step2)
 4. [Add `Filter` to `Trigger`](./step3)
 
 ## Summary
 
-In this tutorial, you learned two ways to consume events on Knative Eventing. With event `Importer`, you can directly link a event consumer to a producer and simply define an event message flow from a producer to a consumer. With `Broker` and `Trigger`, you can decouple event producers and consumers. `Broker` likes an event hub where all event producers send events to. `Trigger` describe event consumer and its intersted subscriptions to specific events, which enables late-binding event producers and event consumers.
+In this tutorial, you will learn two ways to consume events on Knative Eventing. With event source, you can directly link a event consumer to a producer and simply define an event message flow from a producer to a consumer. With `Broker` and `Trigger`, you can decouple event producers and consumers. `Broker` is like an event hub where event producers send events to. `Trigger` describe event consumer and its interested subscriptions to specific events that flow through the broker, which enables late-binding event producers and event consumers.
 
 ## Related links
 
