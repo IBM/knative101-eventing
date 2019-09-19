@@ -1,14 +1,14 @@
 # Use `Broker` and `Trigger` to manage events and subscriptions
 
-If we want to hide the details of event routing from the event producer and event consumer, we can use `Broker` and `Trigger` to manage events and subscriptions. An event producer can send events to `Broker` without any knowledge of event consumers. An event consumer can register its interests to events by `Trigger` without any knowledge of event producers. Events will be routed to any subscribers who are interested in that event by Knative Eventing platform.
+If we want to decouple event providers and consumers, we can use `Broker` and `Trigger` to manage events and subscriptions. A broker is something in the middle of providers and consumers which receives events and forwards them to subscribers defined by one or more matching Triggers. A Trigger describes a filter on event attributes which should be delivered to an `addressable` object as event consumer. The events sent to broker follow a CNCF defined specification [CloudEvent](https://cloudevents.io/) which describes event data in a common way. 
 
 ![](../images/knative-triggermode.png)
 
-In this lab, we create a heart beats event importer, specifing a default broker as the `SINK`. Events emitted from the event producer will be sent to the default broker. And then we define a `Trigger` to subscribe a Knative service to all events in default broker.
+In this lab, we create a broker, a heartbeats event source. Events emitted from the event source will be sent to the broker. And then we define a `Trigger` to subscribe a Knative service to all events in the broker.
 
 ## 1. Create a default `Broker`
 
-A Broker represents an ‘event mesh’. The easiest way to create a Broker is to annotate your namespace by:
+A Broker represents an event bus. There may be many brokers in the platform. The easiest way to create a Broker is to annotate your namespace by:
 
 ```text
 kubectl label namespace default knative-eventing-injection=enabled
@@ -169,7 +169,7 @@ Check the log of `event-display`:
 kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
-You can see the events in CloudEvent format as below：
+You can see the events as below：
 ```
 _  CloudEvent: valid _
 Context Attributes,

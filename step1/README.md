@@ -62,9 +62,9 @@ CronJobSource is a predefined event source which uses an in-memory timer to prod
     ```
 
     There are three parameters in the `spec` of a CronJobSource:
-    - schedule: a cron format string. Here `"*/1 * * * *"` means every minute
-    - data: the data to be posted to the target, in CloudEvent format.
-    - sink: the URI messages will be forwarded on to. Here we use `event-display`, which is the Knative service we just created.
+    - schedule: a [cron](https://en.wikipedia.org/wiki/Cron) format string. Here `"*/1 * * * *"` means every minute
+    - data: the data to be posted to the target, in json format.
+    - sink: the URI messages will be forwarded on to. Here we `Kind` and `name` to specify a Knative Service `event-display`, which we just created.
 
     Create the CronJobSource `cronjobs` by running below command:
 
@@ -91,7 +91,7 @@ CronJobSource is a predefined event source which uses an in-memory timer to prod
 
 ## 3. Look at the logs of `event-display`
 
-The event source `cronjobs` will send a event message to `event-display` every minute. `event-display` will print the message to logs. You can check the running pods on Kubernetes.
+The event source `cronjobs` will send an event to `event-display` every minute. `event-display` will print the events to its logs (stdout). You can check the running pods on Kubernetes.
 
 1. List running Pods by:
 
@@ -139,7 +139,7 @@ The event source `cronjobs` will send a event message to `event-display` every m
 
 ## 4. Delete event source
 
-Use below command to delete `cronjobs`:
+Use the following command to delete `cronjobs`:
 
 ```
 kubectl delete -f cronjob.yaml
@@ -150,5 +150,5 @@ Expected output:
 cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
 ```
 
-We don't delete Knative service `event-display` because we will use it in the following labs. 
+We won't delete the Knative service `event-display` because we will use it in the following labs. 
 
