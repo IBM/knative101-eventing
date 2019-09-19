@@ -8,7 +8,7 @@ In this lab, we create a broker, a heartbeats event source. Events emitted from 
 
 ## 1. Create a default `Broker`
 
-A Broker represents an event bus. There may be many brokers in the platform. The easiest way to create a Broker is to annotate your namespace by:
+A Broker represents an event bus. There could be many brokers in the platform. The easiest way to create a Broker is to annotate your namespace, for example the default namespace, by:
 
 ```text
 kubectl label namespace default knative-eventing-injection=enabled
@@ -19,20 +19,7 @@ Expected output:
 namespace/default labeled
 ```
 
-Check if the broker has been created by:
-```text
-kubectl get broker
-```
-
-Expected output:
-```
-NAME      READY     REASON    HOSTNAME                                   AGE
-default   True                default-broker.default.svc.cluster.local   14s
-```
-
-Please notice the status `READY` of broker is `True`.
-
-Now you can check the running pods serving for brokers by below command line:
+Knative will then start a few pods in your default namespace to implement broker functionalities, e.g. receiving and forwarding events. you can check them by below command line:
 ```
 kubectl get pods
 ```
@@ -43,13 +30,24 @@ NAME                                              READY   STATUS    RESTARTS   A
 default-broker-filter-798df8bc75-77m2r            1/1     Running   0          43s
 default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          43s
 ```
-The pod `default-broker-ingress-*` is responsible for receiving events; the pod `default-broker-filter-*` is responsible for forwarding events to interested targets.
 
-## 2. Create a heart beats event source
+When these two pods are in running status, you can get your broker by:
+```text
+kubectl get broker
+```
 
-ContainerSource is predefined event source which will keep a single Pod running with the specified image, environment, and arguments as an event producer. Now we use ContainerSource to create a heart beats event source, producing events at the specified interval. The image URI of this event source is `docker.io/daisyycguo/heartbeats-6790335e994243a8d3f53b967cdd6398`.
+Expected output:
+```
+NAME      READY     REASON    HOSTNAME                                   AGE
+default   True                default-broker.default.svc.cluster.local   14s
+```
 
-Look at the content of `heartbeats.yaml`, which describes the configuration of a heart beats event source:
+Please notice the status `READY` of broker is `True`, which means the broker is ready for use.
+
+
+## 2. Create a heartbeats event source
+
+Now we will create a heartbeats event source which will produce events at the specified interval. Look at the content of `heartbeats.yaml`, which describes the configuration of a heart beats event source:
 
 ```text
 cat heartbeats.yaml
@@ -76,10 +74,10 @@ spec:
       value: "default"
 ```
 
-There are four parameters in the `spec` of a ContainerSource:
+You may notice the `kind` is `ContainerSource` here, which means Knative will start a container in a Pod and pass an environment variable `SINK` to the container when it starts up. The container will handle the event emiting to `sink` by itself. There are four parameters in the `spec` of a `ContainerSource`:
 - image: the image URL that running inside the event source pod.
 - args and env: environment and arguments to the running container.
-- sink: the URI events will be forwarded on to. Here we use the created default broker.
+- sink: the destination where events will be sent to. Here we use the default broker we just created.
 
 Create a ContainerSource `heartbeats-sender` by running:
 ```text
