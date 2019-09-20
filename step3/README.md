@@ -1,6 +1,6 @@
 # Define a Filter
 
-Multiple kinds of events can be sent to a same broker. If you are interested in a specific event source, you can use Filter in Trigger to subsribe a specific type of events.
+Multiple kinds of events can be sent to the same broker. If you are interested in a specific type of events, you can use the Filter configuration option in the Trigger to subscribe to a specific type of event.
 
 Here we create a second event source `CronJobs` and send events to default broker. Then we use Filter to subscribe to a specific type of events.
 
@@ -18,7 +18,7 @@ NAME       AGE
 cronjobs   23s
 ```
 
-Remember we already have heart beat events in the default Broker. If we add another event source `CronJobs` who also sends events to default broker, we will get two kinds of events in the Broker. 
+Remember we already have heart beat events being sent to the default Broker. If we add another event source, `CronJobs`, that also sends events to default broker, we will get two kinds of events in the Broker. 
 
 Check the logs of `event-display`, you can see that both events from `heartbeats` and `cronjob`:
 
@@ -97,7 +97,9 @@ spec:
       name: event-display
 ```
 
-Create a new `mytrigger` with filter by applying the new version of yaml file:
+Comparing to the old version, the new trigger has an attribute called `filter`. In the `filter`, we define an event type `dev.knative.cronjob.event` which exactly matches the event source `CronJobs`. By adding `filter`, Broker will only forward those events matching the event type to the subscriber.
+
+Now we will create this new `mytrigger` with filter by applying the new version of yaml file:
 
 ```text
 $ kubectl replace -f trigger2.yaml

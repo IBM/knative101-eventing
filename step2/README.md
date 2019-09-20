@@ -102,7 +102,7 @@ heartbeats-sender   2m
 
 ## 3. Create a Trigger to add a subscriber to default broker
 
-A Trigger represents a desire to subscribe to events from a specific Broker. We create a Trigger to have Knative service `event-display` to subscribe to the events sent to default Broker.
+A Trigger represents a desire to subscribe to events from a specific Broker. We will now create a Trigger to have the Knative service `event-display` to subscribe to the events sent to default Broker.
 
 Look at the content of `trigger1.yaml`, which describe a definition of a Trigger:
 ```text
@@ -116,6 +116,7 @@ kind: Trigger
 metadata:
   name: mytrigger
 spec:
+  broker: default
   subscriber:
     ref:
       apiVersion: serving.knative.dev/v1alpha1
@@ -123,7 +124,7 @@ spec:
       name: event-display
 ```
 
-You can see a `subscriber` is defined in its `spec`, which refer to a Knative service `event-display`:
+You can see a `subscriber` is defined in its `spec`, which refer to the `default` broker and the Knative service `event-display`:
 
 Run below command to create a Trigger `mytrigger`:
 ```text
@@ -193,7 +194,7 @@ Data,
   }
 ```
 
-The events from heart beat event source have been printed to logs. It demostrated that the event source `heartbeats-sender` sent the events to Broker, and Broker forwards to `event-display`.
+The events from heart beat event source have been printed to logs. It demonstrated that the event source `heartbeats-sender` sent the events to Broker, and Broker forwards to `event-display`.
 
 Terminate the process by `ctrl + c`.
 
