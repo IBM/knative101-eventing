@@ -6,13 +6,20 @@ Here we create a second event source `CronJobs` and send events to default broke
 
 ![](../images/knative-filtermode.png)
 
-## Step 1. Create another event source CronJobs
+## 1. Create another event source CronJobs
 
 Create another event source `cronjobs` by:
 
 ```text
-$ kubectl apply -f cronjob.yaml
+kubectl apply -f cronjob.yaml
+```
+
+Expected output:
+```
 cronjobsource.sources.eventing.knative.dev/cronjobs created
+```
+
+
 $ kubectl get CronJobSource
 NAME       AGE
 cronjobs   23s
@@ -23,7 +30,7 @@ Remember we already have heart beat events being sent to the default Broker. If 
 Check the logs of `event-display`, you can see that both events from `heartbeats` and `cronjob`:
 
 ```text
-$ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
+kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
 Expected output looks like:
@@ -76,12 +83,16 @@ Data,
 
 Terminate this process by `ctrl+c`.
 
-## Step 2. Define filter in trigger
+## 2. Define filter in trigger
 
 Check a filter to the trigger `mytrigger` yaml file:
 
 ```text
-$ cat trigger2.yaml
+cat trigger2.yaml
+```
+
+Expected output:
+```
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:
@@ -102,60 +113,23 @@ Comparing to the old version, the new trigger has an attribute called `filter`. 
 Now we will create this new `mytrigger` with filter by applying the new version of yaml file:
 
 ```text
-$ kubectl replace -f trigger2.yaml
-trigger.eventing.knative.dev/mytrigger replaced
+kubectl replace -f trigger2.yaml
 ```
 
-Check the new version of `mytrigger` that filter has been configured:
-
-```text
-$ kubectl get trigger mytrigger -o yaml
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Trigger
-metadata:
-  annotations:
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"eventing.knative.dev/v1alpha1","kind":"Trigger","metadata":{"annotations":{},"name":"mytrigger","namespace":"default"},"spec":{"filter":{"sourceAndType":{"type":"dev.knative.cronjob.event"}},"subscriber":{"ref":{"apiVersion":"serving.knative.dev/v1alpha1","kind":"Service","name":"event-display"}}}}
-  creationTimestamp: 2019-06-18T11:05:06Z
-  generation: 1
-  name: mytrigger
-  namespace: default
-  resourceVersion: "26695"
-  selfLink: /apis/eventing.knative.dev/v1alpha1/namespaces/default/triggers/mytrigger
-  uid: ee38938a-91b8-11e9-9c6b-4e0b3deb5d31
-spec:
-  broker: default
-  filter:
-    sourceAndType:
-      type: dev.knative.cronjob.event
-  subscriber:
-    ref:
-      apiVersion: serving.knative.dev/v1alpha1
-      kind: Service
-      name: event-display
-status:
-  conditions:
-  - lastTransitionTime: 2019-06-18T11:05:06Z
-    status: "True"
-    type: Broker
-  - lastTransitionTime: 2019-06-18T11:05:07Z
-    status: "True"
-    type: Ready
-  - lastTransitionTime: 2019-06-18T11:05:07Z
-    status: "True"
-    type: Subscribed
-  subscriberURI: http://event-display.default.svc.cluster.local/
+Expected output:
+```
+trigger.eventing.knative.dev/mytrigger replaced
 ```
 
 Check the logs of `event-display`, you will see that only events from `cronjob` now:
 
 ```text
-$ kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
+kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
 Terminate this process by `ctrl+c`.
 
-## Step 3. Delete all
+## 3. Delete all
 
 Run below command to delete all the artifacts you craeted in this tutorial.
 

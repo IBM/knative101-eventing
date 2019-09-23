@@ -66,7 +66,7 @@ spec:
     kind: Broker
     name: default
   args:
-    - --period=1
+    - --period=10
   env:
     - name: POD_NAME
       value: "heartbeats"
