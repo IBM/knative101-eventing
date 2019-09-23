@@ -41,7 +41,7 @@ CronJobSource is a predefined event source which uses an in-memory timer to prod
 
 1. Create a cron job
 
-    Create a file named as `cronjob.yaml` which includes a definition of a cron job, copying below content into it:
+    Create a file named as `cronjob.yaml` copying below content into it, which is the configuration of a cron job :
 
     ```code
     apiVersion: sources.eventing.knative.dev/v1alpha1

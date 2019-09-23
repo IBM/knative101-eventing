@@ -47,14 +47,11 @@ Please notice the status `READY` of broker is `True`, which means the broker is 
 
 ## 2. Create a heartbeats event source
 
-Now we will create a heartbeats event source which will produce events at the specified interval. Look at the content of `heartbeats.yaml`, which describes the configuration of a heart beats event source:
+Now we will create a heartbeats event source which will produce events at the specified interval. 
 
-```text
-cat heartbeats.yaml
-```
+Create a file named as `heartbeats.yaml` copying below content into it, which is the configuration of a heart beats event source:
 
-Expected output:
-```
+```code
 apiVersion: sources.eventing.knative.dev/v1alpha1
 kind: ContainerSource
 metadata:
@@ -104,13 +101,9 @@ heartbeats-sender   2m
 
 A Trigger represents a desire to subscribe to events from a specific Broker. We will now create a Trigger to have the Knative service `event-display` to subscribe to the events sent to default Broker.
 
-Look at the content of `trigger1.yaml`, which describe a definition of a Trigger:
-```text
-cat trigger1.yaml
-```
+Create a file named as `trigger1.yaml` copying below content into it, which is the configuration of a trigger:
 
-Expected output:
-```
+```code
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:

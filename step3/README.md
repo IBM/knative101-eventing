@@ -8,8 +8,27 @@ Here we create a second event source `CronJobs` and send events to default broke
 
 ## 1. Create another event source CronJobs
 
-Create another event source `cronjobs` by:
+Now we will craete a event source `cronjobs` to send events to default broker.
 
+Create a file named as `cronjob.yaml` copying below content into it, which is the configuration of a cron job event source:
+
+```code
+apiVersion: sources.eventing.knative.dev/v1alpha1
+kind: CronJobSource
+metadata:
+  name: cronjobs
+spec:
+  schedule: "*/1 * * * *"
+  data: "{\"message\": \"Hello world!\"}"
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Broker
+    name: default
+```
+
+Please pay attention to the `SINK` specifying the default broker in the `spec` of this CronJobSource.
+
+Create the cron job event source by applying this file:
 ```text
 kubectl apply -f cronjob.yaml
 ```
@@ -19,8 +38,13 @@ Expected output:
 cronjobsource.sources.eventing.knative.dev/cronjobs created
 ```
 
+Get event source by applying below command:
+```
+kubectl get CronJobSource
+```
 
-$ kubectl get CronJobSource
+Expected output:
+```
 NAME       AGE
 cronjobs   23s
 ```
@@ -85,14 +109,11 @@ Terminate this process by `ctrl+c`.
 
 ## 2. Define filter in trigger
 
-Check a filter to the trigger `mytrigger` yaml file:
+Now we will define a trigger with a filter.
 
-```text
-cat trigger2.yaml
-```
+Create a file named as `trigger2.yaml` copying below content into it, which is the configuration of a trigger with filter:
 
-Expected output:
-```
+```code
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:
@@ -133,15 +154,20 @@ Terminate this process by `ctrl+c`.
 
 Run below command to delete all the artifacts you craeted in this tutorial.
 
+Create a file named as `deleteall.sh` copying below content into it.
+
+```code
+kubectl delete Trigger mytrigger
+kubectl delete CronJobSource cronjobs
+kubectl delete ContainerSource heartbeats-sender
+kubectl delete ksvc event-display
+kubectl label namespace default knative-eventing-injection-
+kubectl delete broker default
+```
+
+Run this script by applying below command:
 ```
 source deleteall.sh
 ```
 
-Expected output:
-```
-trigger.eventing.knative.dev "mytrigger" deleted
-cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
-containersource.sources.eventing.knative.dev "heartbeats-sender" deleted
-service.serving.knative.dev "event-display" deleted
-daisyyings-mbp:step3 Daisy$ source deleteall.sh
-```
+Now you have finished the whole hands-on part of this tutorial.
