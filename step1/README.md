@@ -10,8 +10,23 @@ In this lab, we create an `CronJobSource` as event producer and specify a Knativ
 
 ## 1. Create a Knative service `event-display`
 
-Firstly, we create a Knative service `event-display` that prints incoming events to its log by:
+Firstly, we create a Knative service `event-display` that prints incoming events to its log.
 
+Create a file named as `service.yaml` copying below content into it, which is the configuration of a Knative service:
+
+```code
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: event-display
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/knative-releases/github.com/knative/eventing-sources/cmd/event_display
+```
+
+Create the service by applying below command:
 ```text
 kubectl apply --filename service.yaml 
 ```

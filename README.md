@@ -19,7 +19,6 @@ Before you begin, you’ll need the following:
 - [Setting up Knative in your cluster](https://cloud.ibm.com/docs/containers?topic=containers-serverless-apps-knative#knative-setup)
 - [Kubernetes CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/) is installed
 - [Config Kubernetes CLI to manage IBM Kubernetes Service cluster on IBM Cloud](https://cloud.ibm.com/docs/containers?topic=containers-cs_cli_install#cs_cli_configure)
-- [Git CLI client](https://git-scm.com/downloads) installed
 
 ## Estimated time
 
