@@ -1,8 +1,8 @@
 # Define a Filter
 
-Multiple kinds of events can be sent to the same broker. If you are interested in a specific type of events, you can use the Filter configuration option in the Trigger to subscribe to a specific type of event.
+Multiple kinds of events can be sent to the same broker. If you are interested in a specific type of event, you can use the `Filter` configuration option in the Trigger to subscribe to a specific type of event.
 
-Here we create a second event source `CronJobs` and send events to default broker. Then we use Filter to subscribe to a specific type of events.
+Here we create a second event source `CronJobs` and send events to default broker. Then we use `Filter` to subscribe to the specific type of event.
 
 ![](../images/knative-filtermode.png)
 
@@ -26,7 +26,7 @@ spec:
     name: default
 ```
 
-Please pay attention to the `SINK` specifying the default broker in the `spec` of this CronJobSource.
+Please pay attention to the `SINK` which refer to the default broker.
 
 Create the cron job event source by applying this file:
 ```text
@@ -119,6 +119,7 @@ kind: Trigger
 metadata:
   name: mytrigger
 spec:
+  broker: default
   filter:
     sourceAndType:
       type: dev.knative.cronjob.event

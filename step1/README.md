@@ -1,16 +1,14 @@
 # Subscribe to event producers by defining event sources
 
-Event sources represent event producers which emit events from an external system. There are a list of predefined [event sources](https://knative.dev/v0.3-docs/eventing/sources/) in Knative. The events emitted from event producer will be converted into standard `CloudEvent` message by adapters before they arrives at Knative Eventing data panel.
+Event sources represent event producers which emit events from an external system. There are a list of predefined [event sources](https://knative.dev/v0.3-docs/eventing/sources/) in Knative. Knative service can receive and acknowledge an event delivered over HTTP, so Knative service can be defined as an event consumer.
 
-Event source has a field `SINK` in its spec which is used to specify an `addressable` object as event consumer. For example, Knative service has an access URL defined in its `status.address.hostname` field. Knative service is able to receive and acknowledge an event delivered over HTTP to this URL address. So Knative service can be defined as an event consumer.
-
-In this lab, we create an `CronJobSource` as event producer and specify a Knative service as the event consumer by specifying it as the `SINK` of `CronJobSource`. Thus, an event producer and an event consumer are binded in the event source definition. 
+In this lab, we create an `CronJobSource` as event producer and specify a Knative service as the event consumer by specifying it as the `SINK` of `CronJobSource`. Thus, an event producer and an event consumer are bound in the event source definition. 
 
 ![](../images/knative-simplemode.png)
 
 ## 1. Create a Knative service `event-display`
 
-Firstly, we create a Knative service `event-display` that prints incoming events to its log.
+First of all, we create a Knative service `event-display` that prints incoming events to its log.
 
 Create a file named as `service.yaml` copying below content into it, which is the configuration of a Knative service:
 
@@ -117,7 +115,7 @@ The event source `cronjobs` will send an event to `event-display` every minute. 
     event-display-46hhp-deployment-597487d855-7ctj5   2/2     Running   0          37s
     ```
 
-    The pod named as `cronjob-cronjobs-*` is the cron job event source. The pod named as `event-display-*` is the Knative service `event-display` which will print event message to logs.
+    The pod `cronjob-cronjobs-*` is the cron job event source. The pod `event-display-*` is the Knative service `event-display` which will print event message to logs.
 
 2. Check the logs of `event-display` by:
 

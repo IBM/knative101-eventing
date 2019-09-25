@@ -4,11 +4,11 @@ If we want to decouple event providers and consumers, we can use `Broker` and `T
 
 ![](../images/knative-triggermode.png)
 
-In this lab, we create a broker, a heartbeats event source. Events emitted from the event source will be sent to the broker. And then we define a `Trigger` to subscribe a Knative service to all events in the broker.
+In this lab, we create a `Broker` and a heartbeats event source. Events emitted from the event source will be sent to the broker. And then we define a `Trigger` to subscribe a Knative service to all events in the broker.
 
 ## 1. Create a default `Broker`
 
-A Broker represents an event bus. There could be many brokers in the platform. The easiest way to create a Broker is to annotate your namespace, for example the default namespace, by:
+A Broker represents an event bus. There could be many brokers in the platform. The easiest way to create a `Broker` is to annotate your namespace, for example the default namespace, by:
 
 ```text
 kubectl label namespace default knative-eventing-injection=enabled
@@ -19,7 +19,7 @@ Expected output:
 namespace/default labeled
 ```
 
-Knative will then start a few pods in your default namespace to implement broker functionalities, e.g. receiving and forwarding events. you can check them by below command line:
+Knative will then start a few pods in your default namespace to implement broker functionalities, e.g. receiving and forwarding events. you can verify them by running below command:
 ```
 kubectl get pods
 ```
@@ -49,7 +49,7 @@ Please notice the status `READY` of broker is `True`, which means the broker is 
 
 Now we will create a heartbeats event source which will produce events at the specified interval. 
 
-Create a file named as `heartbeats.yaml` copying below content into it, which is the configuration of a heart beats event source:
+Create a file named as `heartbeats.yaml` copying below content into it, which is the configuration of a heartbeats event source:
 
 ```code
 apiVersion: sources.eventing.knative.dev/v1alpha1
@@ -117,7 +117,7 @@ spec:
       name: event-display
 ```
 
-You can see a `subscriber` is defined in its `spec`, which refer to the `default` broker and the Knative service `event-display`:
+You can see a `broker` and a `subscriber` are defined in its `spec`. Here the `broker` refers to the default broker, and the `subscriber` refer to the Knative service `event-display`.
 
 Run below command to create a Trigger `mytrigger`:
 ```text

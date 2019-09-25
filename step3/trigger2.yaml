@@ -3,6 +3,7 @@ kind: Trigger
 metadata:
   name: mytrigger
 spec:
+  broker: default
   filter:
     sourceAndType:
       type: dev.knative.cronjob.event
