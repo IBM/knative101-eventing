@@ -1,42 +1,42 @@
-# Use `Broker` and `Trigger` to manage events and subscriptions
+# Exercise 2: Use `Broker` and `Trigger` to manage events and subscriptions
 
-If we want to decouple event providers and consumers, we can use `Broker` and `Trigger` to manage events and subscriptions. A broker is something in the middle of providers and consumers which receives events and forwards them to subscribers defined by one or more matching Triggers. A Trigger describes a filter on event attributes which should be delivered to an `addressable` object as event consumer. The events sent to broker follow a CNCF defined specification [CloudEvent](https://cloudevents.io/) which describes event data in a common way. 
+If you want to decouple event providers and consumers, you can use `Broker` and `Trigger` to manage events and subscriptions. A broker is something in the middle of providers and consumers which receives events and forwards them to subscribers defined by one or more matching Triggers. A Trigger describes a filter on event attributes which should be delivered to an `addressable` object as event consumer. The events sent to broker follow a CNCF defined specification [CloudEvent](https://cloudevents.io/) which describes event data in a common way. 
 
 ![](../images/knative-triggermode.png)
 
-In this lab, we create a `Broker` and a heartbeats event source. Events emitted from the event source will be sent to the broker. And then we define a `Trigger` to subscribe a Knative service to all events in the broker.
+In this lab, you create a `Broker` and a heartbeats event source. Events emitted from the event source are sent to the broker. And then you define a `Trigger` to subscribe a Knative service to all events in the broker.
 
 ## 1. Create a default `Broker`
 
-A Broker represents an event bus. There could be many brokers in the platform. The easiest way to create a `Broker` is to annotate your namespace, for example the default namespace, by:
+A Broker represents an event bus. There could be many brokers in the platform. The easiest way to create a `Broker` is to annotate your namespace, for example the default namespace, by running the following command:
 
 ```text
 kubectl label namespace default knative-eventing-injection=enabled
 ```
 
-Expected output:
+The expected output is:
 ```
 namespace/default labeled
 ```
 
-Knative will then start a few pods in your default namespace to implement broker functionalities, e.g. receiving and forwarding events. you can verify them by running below command:
+Knative will then start a few pods in your default namespace to implement broker functionalities, e.g. receiving and forwarding events. you can verify them by running the following command:
 ```
 kubectl get pods
 ```
 
-Expected output:
+The expected output is:
 ```
 NAME                                              READY   STATUS    RESTARTS   AGE
 default-broker-filter-798df8bc75-77m2r            1/1     Running   0          43s
 default-broker-ingress-5fbb869648-q4xzb           1/1     Running   0          43s
 ```
 
-When these two pods are in running status, you can get your broker by:
+When these two pods are in running status, you can get your broker by running the following command:
 ```text
 kubectl get broker
 ```
 
-Expected output:
+The expected output is:
 ```
 NAME      READY     REASON    HOSTNAME                                   AGE
 default   True                default-broker.default.svc.cluster.local   14s
@@ -47,9 +47,9 @@ Please notice the status `READY` of broker is `True`, which means the broker is 
 
 ## 2. Create a heartbeats event source
 
-Now we will create a heartbeats event source which will produce events at the specified interval. 
+Now you create a heartbeats event source which produces events at the specified interval. 
 
-Create a file named as `heartbeats.yaml` copying below content into it, which is the configuration of a heartbeats event source:
+Create a file named as `heartbeats.yaml` and copy the following content into it, which is the configuration of a heartbeats event source:
 
 ```code
 apiVersion: sources.eventing.knative.dev/v1alpha1
@@ -71,27 +71,27 @@ spec:
       value: "default"
 ```
 
-You may notice the `kind` is `ContainerSource` here, which means Knative will start a container in a Pod and pass an environment variable `SINK` to the container when it starts up. The container will handle the event emiting to `sink` by itself. There are four parameters in the `spec` of a `ContainerSource`:
+You might notice the `kind` is `ContainerSource` here, which means Knative starts a container in a Pod and passes an environment variable `SINK` to the container when it starts up. The container handles the event emiting to `sink` by itself. There are four parameters in the `spec` of a `ContainerSource`:
 - image: the image URL that running inside the event source pod.
 - args and env: environment and arguments to the running container.
-- sink: the destination where events will be sent to. Here we use the default broker we just created.
+- sink: the destination where events are sent. Here you use the default broker you just created.
 
-Create a ContainerSource `heartbeats-sender` by running:
+Create a ContainerSource `heartbeats-sender` by running the following command:
 ```text
 kubectl apply -f heartbeats.yaml
 ```
 
-Expected output:
+The expected output is:
 ```
 containersource.sources.eventing.knative.dev/heartbeats-sender created
 ```
 
-Check if `heartbeats-sender` has been created by:
+Check if `heartbeats-sender` has been created by running the following command:
 ```text
 kubectl get ContainerSource
 ```
 
-Expected output:
+The expected output is:
 ```
 NAME                AGE
 heartbeats-sender   2m
@@ -99,7 +99,7 @@ heartbeats-sender   2m
 
 ## 3. Create a Trigger to add a subscriber to default broker
 
-A Trigger represents a desire to subscribe to events from a specific Broker. We will now create a Trigger to have the Knative service `event-display` to subscribe to the events sent to default Broker.
+A Trigger represents a desire to subscribe to events from a specific Broker. You now create a Trigger to have the Knative service `event-display` to subscribe to the events sent to default Broker.
 
 Create a file named as `trigger1.yaml` copying below content into it, which is the configuration of a trigger:
 
@@ -124,17 +124,17 @@ Run below command to create a Trigger `mytrigger`:
 kubectl apply -f trigger1.yaml
 ```
 
-Expected output:
+The expected output is:
 ```
 trigger.eventing.knative.dev/mytrigger created
 ```
 
-Check if Trigger has been created:
+Check if the Trigger has been created by running the following:
 ```text
 kubectl get trigger
 ```
 
-Expected output:
+The expected output is:
 ```
 NAME        READY     REASON    BROKER    SUBSCRIBER_URI                                    AGE
 mytrigger   True                default   http://event-display.default.svc.cluster.local/   29s
@@ -142,12 +142,12 @@ mytrigger   True                default   http://event-display.default.svc.clust
 
 ## 4. Look at the logs of event-display
 
-List running Pods and see if the pod `event-display-*` is running: 
+List the running Pods and see if the pod `event-display-*` is running: 
 ```
 kubectl get pods
 ```
 
-Expected output:
+The expected output is:
 ```
 NAME                                              READY   STATUS    RESTARTS   AGE
 default-broker-filter-798df8bc75-77m2r            1/1     Running   0          4m32s
@@ -161,7 +161,7 @@ Check the log of `event-display`:
 kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
 ```
 
-You can see the events as below：
+You can see the events, similar to the following example：
 ```
 _  CloudEvent: valid _
 Context Attributes,
@@ -187,9 +187,9 @@ Data,
   }
 ```
 
-The events from heart beat event source have been printed to logs. It demonstrated that the event source `heartbeats-sender` sent the events to Broker, and Broker forwards to `event-display`.
+The events from heartbeat event source are printed to logs. It demonstrates that the event source `heartbeats-sender` sent the events to Broker, and the Broker forwards it to `event-display`.
 
-Terminate the process by `ctrl + c`.
+Terminate the process with `ctrl + c`.
 
-
+Go to [Exercise 3](../step3).
 
