@@ -1,16 +1,16 @@
-# Subscribe to event producers by defining event sources
+# Exercise 1: Subscribe to event producers by defining event sources
 
-Event sources represent event producers which emit events from an external system. There are a list of predefined [event sources](https://knative.dev/v0.3-docs/eventing/sources/) in Knative. Knative service can receive and acknowledge an event delivered over HTTP, so Knative service can be defined as an event consumer.
+Event sources represent event producers that emit events from an external system. See the list of predefined [event sources](https://knative.dev/v0.3-docs/eventing/sources/) in Knative. Knative services can receive and acknowledge an event delivered over HTTP, so Knative services can be defined as an event consumer.
 
-In this lab, we create an `CronJobSource` as event producer and specify a Knative service as the event consumer by specifying it as the `SINK` of `CronJobSource`. Thus, an event producer and an event consumer are bound in the event source definition. 
+In this lab, you create an `CronJobSource` as an event producer and specify a Knative service as the event consumer by specifying it as the `SINK` of `CronJobSource`. Thus, an event producer and an event consumer are bound in the event source definition. 
 
 ![](../images/knative-simplemode.png)
 
 ## 1. Create a Knative service `event-display`
 
-First of all, we create a Knative service `event-display` that prints incoming events to its log.
+First of all, you create a Knative service `event-display` that prints incoming events to its log.
 
-Create a file named as `service.yaml` copying below content into it, which is the configuration of a Knative service:
+Create a file named as `service.yaml` copying the following content into it, which is the configuration of a Knative service:
 
 ```code
 apiVersion: serving.knative.dev/v1alpha1
@@ -29,32 +29,32 @@ Create the service by applying below command:
 kubectl apply --filename service.yaml 
 ```
 
-Expected output:
+Here is the expected output:
 ```
 service.serving.knative.dev/event-display created
 ```
 
-Run below command and check if the status `READY` of this Knative service is `True`:
+Run the following command and check if the status `READY` of this Knative service is `True`:
 
 ```text
 kubectl get ksvc
 ```
 
-Expected output：
+Here is the expected output：
 ```
 NAME            URL                                                                              LATESTCREATED         LATESTREADY           READY     REASON
 event-display   http://event-display-default.mycluster-guoyc.au-syd.containers.appdomain.cloud   event-display-6mcvg   event-display-6mcvg   True
 ```
 
-Please notice that you get a service URL here which you could use to access this service. We will use this URL in the following step.
+Note that you get a service URL here which you could use to access this service. We will use this URL in the following step.
 
 ## 2. Create a CronJobSource
 
-CronJobSource is a predefined event source which uses an in-memory timer to produce events on the specified Cron schedule.
+CronJobSource is a predefined event source that uses an in-memory timer to produce events on the specified Cron schedule.
 
-1. Create a cron job
+1. Create a cron job.
 
-    Create a file named as `cronjob.yaml` copying below content into it, which is the configuration of a cron job :
+    Create a file named as `cronjob.yaml` copying the following content into it, which is the configuration of a cron job :
 
     ```code
     apiVersion: sources.eventing.knative.dev/v1alpha1
@@ -75,13 +75,13 @@ CronJobSource is a predefined event source which uses an in-memory timer to prod
     - data: the data to be posted to the target, in json format.
     - sink: the URI messages will be forwarded on to. Here we `Kind` and `name` to specify a Knative Service `event-display`, which we just created.
 
-    Create the CronJobSource `cronjobs` by running below command:
+    Create the CronJobSource `cronjobs` by running the following command:
 
     ```text
     kubectl apply -f cronjob.yaml
     ```
 
-    Expected output:
+    The expected output is:
     ```
     cronjobsource.sources.eventing.knative.dev/cronjobs created
     ```
@@ -92,7 +92,7 @@ CronJobSource is a predefined event source which uses an in-memory timer to prod
     kubectl get cronjobsource
     ```
 
-    Expected output:
+    The expected output is:
     ```
     NAME       AGE
     cronjobs   44s
@@ -100,9 +100,9 @@ CronJobSource is a predefined event source which uses an in-memory timer to prod
 
 ## 3. Look at the logs of `event-display`
 
-The event source `cronjobs` will send an event to `event-display` every minute. `event-display` will print the events to its logs (stdout). You can check the running pods on Kubernetes.
+The event source `cronjobs` sends an event to `event-display` every minute. `event-display` prints the events to its logs (stdout). You can check the running pods on Kubernetes.
 
-1. List running Pods by:
+1. List running Pods by running the following command:
 
     ```
     kubectl get pods
@@ -117,13 +117,13 @@ The event source `cronjobs` will send an event to `event-display` every minute. 
 
     The pod `cronjob-cronjobs-*` is the cron job event source. The pod `event-display-*` is the Knative service `event-display` which will print event message to logs.
 
-2. Check the logs of `event-display` by:
+2. Check the logs of `event-display` by running the following command:
 
     ```
     kubectl logs -f $(kubectl get pods --selector=serving.knative.dev/configuration=event-display --output=jsonpath="{.items..metadata.name}") user-container
     ```
 
-    Expected output:
+    The expected output is:
     ```
     _  CloudEvent: valid _
     Context Attributes,
@@ -144,9 +144,9 @@ The event source `cronjobs` will send an event to `event-display` every minute. 
     ```
     It shows that Knative service `event-display` gets event messages sent from CronJobSource `cronjobs`.
 
-    Terminate this process by `ctrl + c`.
+    Terminate this process with `ctrl + c`.
 
-## 4. Delete event source
+## 4. Delete the event source
 
 Use the following command to delete `cronjobs`:
 
@@ -154,10 +154,11 @@ Use the following command to delete `cronjobs`:
 kubectl delete -f cronjob.yaml
 ```
 
-Expected output:
+The expected output is:
 ```
 cronjobsource.sources.eventing.knative.dev "cronjobs" deleted
 ```
 
-We won't delete the Knative service `event-display` because we will use it in the following labs. 
+You don't delete the Knative service `event-display` because you will use it in the following lab exercises. 
 
+Go to [Exercise 2](../step2).
