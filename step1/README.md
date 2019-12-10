@@ -60,7 +60,7 @@ CronJobSource is a predefined event source that uses an in-memory timer to produ
     apiVersion: sources.eventing.knative.dev/v1alpha1
     kind: CronJobSource
     metadata:
-    name: cronjobs
+      name: cronjobs
     spec:
       schedule: "*/1 * * * *"
       data: "{\"message\": \"Hello world!\"}"
